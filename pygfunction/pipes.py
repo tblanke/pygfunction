@@ -817,9 +817,7 @@ class _BasePipe(ABC):
             return False
         return True
 
-    def _check_coefficients(
-            self, m_flow_borehole, cp_f, nSegments, segment_ratios, method_id,
-            tol=1e-6):
+    def _check_coefficients(self, m_flow_borehole: float, cp_f: float, nSegments: int, segment_ratios: float, method_id: int, tol: float = 1e-6) -> bool:
         stored_m_flow_cp = self._stored_m_flow_cp[method_id]
         stored_nSegments = self._stored_nSegments[method_id]
         stored_segment_ratios = self._stored_segment_ratios[method_id]
@@ -832,15 +830,11 @@ class _BasePipe(ABC):
                 check_ratios = False
         else:
             check_ratios = False
-        if (check_ratios
-            and np.all(np.abs(m_flow_borehole*cp_f - stored_m_flow_cp) < np.abs(stored_m_flow_cp)*tol)):
-            check = True
-        else:
-            check = False
+        if not check_ratios or not np.all(np.abs(m_flow_borehole * cp_f - stored_m_flow_cp) < np.abs(stored_m_flow_cp) * tol):
+            return False
+        return True
 
-        return check
-
-    def _check_geometry(self):
+    def _check_geometry(self) -> bool:
         """ Verifies the inputs to the pipe object and raises an error if
             the geometry is not valid.
         """
@@ -898,8 +892,9 @@ class _BasePipe(ABC):
 
         return True
 
+    @abstractmethod
     def _continuity_condition_base(
-            self, m_flow_borehole, cp_f, nSegments, segment_ratios=None):
+            self, m_flow_borehole: float, cp_f: float, nSegments: int, segment_ratios: Optional[NDArray[np.float64]] = None) -> NDArray[np.float64]:
         """ Returns coefficients for the relation
             [a_out]*[T_{f,out}] = [a_in]*[T_{f,in}] + [a_b]*[t_b]
         """
@@ -908,8 +903,9 @@ class _BasePipe(ABC):
             'this method should return matrices for the relation: '
             '[a_out]*[T_{f,out}] = [a_in]*[T_{f,in}] + [a_b]*[t_b]')
 
+    @abstractmethod
     def _continuity_condition_head(
-            self, m_flow_borehole, cp_f, nSegments, segment_ratios=None):
+            self, m_flow_borehole: float, cp_f: float, nSegments: int, segment_ratios: Optional[NDArray[np.float64]] = None) -> NDArray[np.float64]:
         """ Returns coefficients for the relation
             [T_f](z=0) = [a_in]*[T_{f,in}] + [a_out]*[T_{f,out}] + [a_b]*[t_b]
         """
@@ -919,8 +915,9 @@ class _BasePipe(ABC):
             '[T_f](z=0) = [a_in]*[T_{f,in}] + [a_out]*[T_{f,out}] '
             '+ [a_b]*[t_b]')
 
+    @abstractmethod
     def _general_solution(
-            self, z, m_flow_borehole, cp_f, nSegments, segment_ratios=None):
+            self, z: float, m_flow_borehole: float, cp_f: float, nSegments: int, segment_ratios: Optional[NDArray[np.float64]] = None) -> NDArray[np.float64]:
         """ Returns coefficients for the relation
             [T_f](z) = [a_f0]*[T_f](0) + [a_b]*[t_b]
         """
@@ -929,8 +926,9 @@ class _BasePipe(ABC):
             'this method should return matrices for the relation: '
             '[T_f](z) = [a_f0]*[T_f](0) + [a_b]*[t_b]')
 
+    @abstractmethod
     def _update_model_variables(
-            self, m_flow_borehole, cp_f, nSegments, segment_ratios):
+            self, m_flow_borehole: float, cp_f: float, nSegments: int, segment_ratios: Union[NDArray[np.float64]]) -> NDArray[np.float64]:
         """
         Evaluate common coefficients needed in other class methods.
         """
@@ -939,8 +937,9 @@ class _BasePipe(ABC):
             'this method should evaluate common coefficients needed in other '
             'class methods.')
 
+    @abstractmethod
     def _format_inputs(
-            self, m_flow_borehole, cp_f, nSegments, segment_ratios):
+            self, m_flow_borehole: float, cp_f: float, nSegments: int, segment_ratios: Optional[NDArray[np.float64]]) -> NDArray[np.float64]:
         """
         Format arrays of mass flow rates and heat capacity.
         """
