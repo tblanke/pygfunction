@@ -177,7 +177,7 @@ class ClaessonJaved(_LoadAggregation):
            *pygfunction* assumes positive values for heat
            **extraction** and for borehole wall temperature **drops**. The
            borehole wall temperature are thus given by :
-           :math:`T_b = T_g - \\Delta T_b`.
+           :math:`t_b = T_g - \\Delta t_b`.
 
         """
         # Use numpy.einsum for spatial and temporal superposition
@@ -391,7 +391,7 @@ class MLAA(_LoadAggregation):
            *pygfunction* assumes positive values for heat
            **extraction** and for borehole wall temperature **drops**. The
            borehole wall temperature are thus given by :
-           :math:`T_b = T_g - \\Delta T_b`.
+           :math:`t_b = T_g - \\Delta t_b`.
 
         """
         # Non-aggregated loads
@@ -638,7 +638,7 @@ class Liu(_LoadAggregation):
            *pygfunction* assumes positive values for heat
            **extraction** and for borehole wall temperature **drops**. The
            borehole wall temperature are thus given by :
-           :math:`T_b = T_g - \\Delta T_b`.
+           :math:`t_b = T_g - \\Delta t_b`.
 
         """
         deltaT = 0.

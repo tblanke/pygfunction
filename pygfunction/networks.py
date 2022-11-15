@@ -432,7 +432,7 @@ class Network(object):
 
                 \\mathbf{T_{f,borehole,in}} =
                 \\mathbf{a_{in}} T_{f,network,in}
-                + \\mathbf{a_{b}} \\mathbf{T_b}
+                + \\mathbf{a_{b}} \\mathbf{t_b}
 
         Parameters
         ----------
@@ -512,7 +512,7 @@ class Network(object):
 
                 \\mathbf{T_{f,borehole,out}} =
                 \\mathbf{a_{in}} T_{f,network,in}
-                + \\mathbf{a_{b}} \\mathbf{T_b}
+                + \\mathbf{a_{b}} \\mathbf{t_b}
 
         Parameters
         ----------
@@ -592,7 +592,7 @@ class Network(object):
 
                 \\mathbf{T_{f,network,in}} =
                 \\mathbf{a_{q,f}} Q_{f}
-                + \\mathbf{a_{b}} \\mathbf{T_b}
+                + \\mathbf{a_{b}} \\mathbf{t_b}
 
         Parameters
         ----------
@@ -658,7 +658,7 @@ class Network(object):
 
                 \\mathbf{T_{f,network,out}} =
                 \\mathbf{a_{in}} T_{f,network,in}
-                + \\mathbf{a_{b}} \\mathbf{T_b}
+                + \\mathbf{a_{b}} \\mathbf{t_b}
 
         Parameters
         ----------
@@ -723,7 +723,7 @@ class Network(object):
 
                 \\mathbf{Q_b} =
                 \\mathbf{a_{in}} T_{f,network,in}
-                + \\mathbf{a_{b}} \\mathbf{T_b}
+                + \\mathbf{a_{b}} \\mathbf{t_b}
 
         Parameters
         ----------
@@ -802,7 +802,7 @@ class Network(object):
 
                 \\mathbf{Q_f} =
                 \\mathbf{a_{in}} T_{f,network,in}
-                + \\mathbf{a_{b}} \\mathbf{T_b}
+                + \\mathbf{a_{b}} \\mathbf{t_b}
 
         Parameters
         ----------
@@ -881,7 +881,7 @@ class Network(object):
 
                 \\mathbf{Q_network} =
                 \\mathbf{a_{in}} T_{f,network,in}
-                + \\mathbf{a_{b}} \\mathbf{T_b}
+                + \\mathbf{a_{b}} \\mathbf{t_b}
 
         Parameters
         ----------
@@ -1224,7 +1224,7 @@ class _EquivalentNetwork(Network):
 
                 \\mathbf{Q_network} =
                 \\mathbf{a_{in}} T_{f,network,in}
-                + \\mathbf{a_{b}} \\mathbf{T_b}
+                + \\mathbf{a_{b}} \\mathbf{t_b}
 
         Parameters
         ----------
@@ -1397,8 +1397,8 @@ def network_thermal_resistance(network, m_flow_network, cp_f):
     H_tot = network.H_tot
 
 
-    # Coefficients for T_{f,out} = A_out*T_{f,in} + [B_out]*[T_b], and
-    # Q_b = [A_Q]*T{f,in} + [B_Q]*[T_b]
+    # Coefficients for T_{f,out} = A_out*T_{f,in} + [B_out]*[t_b], and
+    # Q_b = [A_Q]*T{f,in} + [B_Q]*[t_b]
     A_out, B_out = network.coefficients_network_outlet_temperature(
             m_flow_network, cp_f, 1)
     A_Q, B_Q = network.coefficients_network_heat_extraction_rate(

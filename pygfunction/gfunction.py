@@ -585,7 +585,7 @@ class gFunction(object):
         ax1.axis('equal')
         _format_axes(ax1)
         ax2 = fig.add_subplot(122)
-        ax2.set_xlabel(r'$T_b$')
+        ax2.set_xlabel(r'$t_b$')
         ax2.set_ylabel(r'$z$ [m]')
         ax2.invert_yaxis()
         _format_axes(ax2)
@@ -738,7 +738,7 @@ class gFunction(object):
 
         Returns
         -------
-        T_b : list of array
+        t_b : list of array
             Borehole wall temperatures (dimensionless).
 
         """
@@ -777,7 +777,7 @@ class gFunction(object):
         -------
         z : list of array
             Depths (in meters) corresponding to borehole wall temperatures.
-        T_b : list of array
+        t_b : list of array
             Borehole wall temperatures (dimensionless).
 
         """
@@ -1583,12 +1583,12 @@ class _BaseSolver(object):
                     # ---------------------------------------------------------
                     # Build a system of equation [A]*[X] = [B] for the
                     # evaluation of the g-function. [A] is a coefficient
-                    # matrix, [X] = [Q_b,T_b] is a state space vector of the
+                    # matrix, [X] = [Q_b,t_b] is a state space vector of the
                     # borehole heat extraction rates and borehole wall
                     # temperature (equal for all segments), [B] is a
                     # coefficient vector.
                     #
-                    # Spatial superposition: [T_b] = [T_b0] + [h_ij_dt]*[Q_b]
+                    # Spatial superposition: [t_b] = [T_b0] + [h_ij_dt]*[Q_b]
                     # Energy conservation: sum([Q_b*Hb]) = sum([Hb])
                     # ---------------------------------------------------------
                     A = np.block([[h_dt, -np.ones((self.nSources, 1),
@@ -1608,12 +1608,12 @@ class _BaseSolver(object):
                     # ---------------------------------------------------------
                     # Build a system of equation [A]*[X] = [B] for the
                     # evaluation of the g-function. [A] is a coefficient
-                    # matrix, [X] = [Q_b,T_b,Tf_in] is a state space vector of
+                    # matrix, [X] = [Q_b,t_b,Tf_in] is a state space vector of
                     # the borehole heat extraction rates, borehole wall
                     # temperatures and inlet fluid temperature (into the bore
                     # field), [B] is a coefficient vector.
                     #
-                    # Spatial superposition: [T_b] = [T_b0] + [h_ij_dt]*[Q_b]
+                    # Spatial superposition: [t_b] = [T_b0] + [h_ij_dt]*[Q_b]
                     # Heat transfer inside boreholes:
                     # [Q_{b,i}] = [a_in]*[T_{f,in}] + [a_{b,i}]*[T_{b,i}]
                     # Energy conservation: sum([Q_b*H_b]) = sum([H_b])

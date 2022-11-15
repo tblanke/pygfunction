@@ -110,7 +110,7 @@ def main():
     ax2 = fig.add_subplot(312)
     # Axis labels
     ax2.set_xlabel(r'$t$ [hours]')
-    ax2.set_ylabel(r'$T_b$ [degC]')
+    ax2.set_ylabel(r'$t_b$ [degC]')
     gt.utilities._format_axes(ax2)
 
     ax2.plot(hours, T_b)

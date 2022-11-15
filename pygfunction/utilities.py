@@ -4,7 +4,7 @@ import numpy as np
 import numpy.polynomial.polynomial as poly
 from scipy.special import erf
 import warnings
-from typing import Union
+from typing import Tuple
 from numpy.typing import NDArray
 
 
@@ -27,7 +27,7 @@ def cardinal_point(direction):
 sqrt_pi = 1 / np.sqrt(np.pi)
 
 
-def erf_int(x: Union[NDArray[np.float64], float]) -> NDArray[np.float64]:
+def erf_int(x: NDArray[np.float64]) -> NDArray[np.float64]:
     """
     Integral of the error function.
 
@@ -50,7 +50,7 @@ def erf_int(x: Union[NDArray[np.float64], float]) -> NDArray[np.float64]:
     return y_new
 
 
-def erf_int_old(x: Union[NDArray[np.float64], float]) -> NDArray[np.float64]:
+def erf_int_old(x: NDArray[np.float64]) -> NDArray[np.float64]:
     """
     Integral of the error function.
 
@@ -68,7 +68,7 @@ def erf_int_old(x: Union[NDArray[np.float64], float]) -> NDArray[np.float64]:
     return x * erf(x) - (1.0 - np.exp(-x*x)) / np.sqrt(np.pi)
 
 
-def exp1(x):
+def exp1(x: NDArray[np.float64]) -> NDArray[np.float64]:
     """
     Exponential integral E1.
 
@@ -99,7 +99,7 @@ def exp1(x):
     return E1
 
 
-def segment_ratios(nSegments, end_length_ratio=0.02):
+def segment_ratios(nSegments: int, end_length_ratio: float = 0.02):
     """
     Discretize a borehole into segments of different lengths using a
     geometrically expanding mesh from the provided end-length-ratio towards the
@@ -134,7 +134,7 @@ def segment_ratios(nSegments, end_length_ratio=0.02):
         Mathematical Physics. Lund, Sweden.
     """
     def is_even(n):
-        "Returns True if n is even."
+        # Returns True if n is even.
         return not(n & 0x1)
     assert nSegments >= 1 and isinstance(nSegments, int), \
             "The number of segments `nSegments` should be greater or equal " \
@@ -241,7 +241,7 @@ def segment_ratios(nSegments, end_length_ratio=0.02):
     return segment_ratios
 
 
-def time_ClaessonJaved(dt, tmax, cells_per_level=5):
+def time_ClaessonJaved(dt: float, tmax: float, cells_per_level: int = 5) -> NDArray[np.float64]:
     """
     Build a time vector of expanding cell width following the method of
     Claesson and Javed [#ClaessonJaved2012]_.
@@ -293,7 +293,7 @@ def time_ClaessonJaved(dt, tmax, cells_per_level=5):
     return time
 
 
-def time_MarcottePasquier(dt, tmax, non_expanding_cells=48):
+def time_MarcottePasquier(dt: float, tmax: float, non_expanding_cells: int = 48) -> NDArray[np.float64]:
     """
     Build a time vector of expanding cell width following the method of
     Marcotte and Pasquier [#MarcottePasquier2008]_.
@@ -345,7 +345,7 @@ def time_MarcottePasquier(dt, tmax, non_expanding_cells=48):
     return time
 
 
-def time_geometric(dt, tmax, Nt):
+def time_geometric(dt: float, t_max: float, Nt: int) -> NDArray[np.float64]:
     """
     Build a time vector of geometrically expanding cell width.
 
@@ -353,7 +353,7 @@ def time_geometric(dt, tmax, Nt):
     ----------
     dt : float
         Simulation time step (in seconds).
-    tmax : float
+    t_max : float
         Maximum simulation time (in seconds).
     Nt : int
         Total number of time steps.
@@ -369,22 +369,22 @@ def time_geometric(dt, tmax, Nt):
     array([3600., 8971.99474335, 16988.19683297, 28950.14002383, 46800.])
 
     """
-    if tmax > Nt*dt:
+    if t_max > Nt*dt:
         # Identify expansion rate (r)
         dr = 1.0e99
         r = 2.
         while np.abs(dr) > 1.0e-10:
-            dr = (1+tmax/dt*(r-1))**(1/Nt) - r
+            dr = (1 + t_max / dt * (r - 1)) ** (1 / Nt) - r
             r += dr
         time = np.array([dt*(1-r**(j+1))/(1-r) for j in range(Nt)])
-        time[-1] = tmax
+        time[-1] = t_max
     else:
         time = np.array([dt*(j+1) for j in range(Nt)])
 
     return time
 
 
-def _initialize_figure():
+def _initialize_figure() -> plt.figure:
     """
     Initialize a matplotlib figure object with overwritten default parameters.
 
@@ -403,7 +403,7 @@ def _initialize_figure():
     return fig
 
 
-def _format_axes(ax):
+def _format_axes(ax: plt.axes) -> None:
     """
     Adjust axis parameters.
 
@@ -424,7 +424,7 @@ def _format_axes(ax):
     return
 
 
-def _format_axes_3d(ax):
+def _format_axes_3d(ax: plt.axes) -> None:
     """
     Adjust axis parameters.
 
@@ -504,7 +504,7 @@ _a_erf = [np.array([1.] + [-2*a for a in a_Qi]) for a_Qi in _a_Q]
 _b_erf = [np.array([0.] + [b*2 for b in b_Qi]) for b_Qi in _b_Q]
 
 
-def _erf_coeffs(N):
+def _erf_coeffs(N: int) -> Tuple[NDArray[np.float64], NDArray[np.float64]]:
     """
     Return the coefficients of the approximation of the error function.
 

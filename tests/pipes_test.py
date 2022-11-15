@@ -148,7 +148,7 @@ def test_multipole(J, expected):
 # Test pipe classes
 # =============================================================================
 # Test get_temperature
-@pytest.mark.parametrize("pipe_fixture, segment_ratios, T_b, z, expected", [
+@pytest.mark.parametrize("pipe_fixture, segment_ratios, t_b, z, expected", [
     # Single U-tube
     ('single_Utube', None, 1., 65., np.array([4.34676755, 3.07354134])),
     ('single_Utube', None, np.array([1., 2., 3., 1.]), 65., np.array([4.41754093, 3.49949295])),
@@ -201,7 +201,7 @@ def test_temperature(
 
 
 # Test get_outlet_temperature
-@pytest.mark.parametrize("pipe_fixture, segment_ratios, T_b, expected", [
+@pytest.mark.parametrize("pipe_fixture, segment_ratios, t_b, expected", [
     # Single U-tube
     ('single_Utube', None, 1., 2.712371852688313),
     ('single_Utube', None, np.array([1., 2., 3., 1.]), 3.1377635748663573),
@@ -238,7 +238,7 @@ def test_outlet_temperature(
 
 
 # Test get_inlet_temperature
-@pytest.mark.parametrize("pipe_fixture, segment_ratios, T_b, expected", [
+@pytest.mark.parametrize("pipe_fixture, segment_ratios, t_b, expected", [
     # Single U-tube
     ('single_Utube', None, 1., 7.595314034714041),
     ('single_Utube', None, np.array([1., 2., 3., 1.]), 8.33912674339739),
@@ -274,7 +274,7 @@ def test_inlet_temperature(pipe_fixture, segment_ratios, T_b, expected, request)
 
 
 # Test get_borehole_heat_extraction_rate
-@pytest.mark.parametrize("pipe_fixture, segment_ratios, T_b, expected", [
+@pytest.mark.parametrize("pipe_fixture, segment_ratios, t_b, expected", [
     # Single U-tube
     ('single_Utube', None, 1., -1819.4736348927008),
     ('single_Utube', None, np.array([1., 2., 3., 1.]), np.array([-507.98022943, -330.29924271, -155.92399643, -486.93326314])),
@@ -311,7 +311,7 @@ def test_borehole_heat_extraction_rate(
 
 
 # Test get_fluid_heat_extraction_rate
-@pytest.mark.parametrize("pipe_fixture, segment_ratios, T_b, expected", [
+@pytest.mark.parametrize("pipe_fixture, segment_ratios, t_b, expected", [
     # Single U-tube
     ('single_Utube', None, 1., -1819.4736348927008),
     ('single_Utube', None, np.array([1., 2., 3., 1.]), -1481.1367317058312),
@@ -348,7 +348,7 @@ def test_fluid_heat_extraction_rate(
 
 
 # Test get_total_heat_extraction_rate
-@pytest.mark.parametrize("pipe_fixture, segment_ratios, T_b, expected", [
+@pytest.mark.parametrize("pipe_fixture, segment_ratios, t_b, expected", [
     # Single U-tube
     ('single_Utube', None, 1., -1819.4736348927008),
     ('single_Utube', None, np.array([1., 2., 3., 1.]), -1481.1367317058312),
@@ -389,7 +389,7 @@ def test_total_heat_extraction_rate(
 # =============================================================================
 # Test get_temperature
 @pytest.mark.parametrize(
-    "pipe_fixture, m_flow, T_f_in, segment_ratios, T_b, z, expected", [
+    "pipe_fixture, m_flow, T_f_in, segment_ratios, t_b, z, expected", [
     # Double U-tube
     ('double_Utube_independent', np.array([0.2, 0.15]), np.array([5., -1.]), None, 1., 65., np.array([4.33561246, -0.53401739,  3.03985865, 0.28974217])),
     ('double_Utube_independent', np.array([0.2, 0.15]), np.array([5., -1.]), None, np.array([1., 2., 3., 1.]), 65., np.array([4.40351925, -0.44632268,  3.43990994, 0.77984857])),
@@ -420,7 +420,7 @@ def test_temperature_independent(
 
 # Test get_outlet_temperature
 @pytest.mark.parametrize(
-    "pipe_fixture, m_flow, T_f_in, segment_ratios, T_b, expected", [
+    "pipe_fixture, m_flow, T_f_in, segment_ratios, t_b, expected", [
     # Double U-tube
     ('double_Utube_independent', np.array([0.2, 0.15]), np.array([5., -1.]), None, 1., np.array([2.66975268, 0.50433911])),
     ('double_Utube_independent', np.array([0.2, 0.15]), np.array([5., -1.]), None, np.array([1., 2., 3., 1.]), np.array([3.07152772, 0.9760115])),
@@ -444,7 +444,7 @@ def test_outlet_temperature_independent(
 
 # Test get_inlet_temperature
 @pytest.mark.parametrize(
-    "pipe_fixture, m_flow, Q_f, segment_ratios, T_b, expected", [
+    "pipe_fixture, m_flow, Q_f, segment_ratios, t_b, expected", [
     # Double U-tube
     ('double_Utube_independent', np.array([0.2, 0.15]), np.array([-3000., 2000.]), None, 1., np.array([7.40595748, -3.59946781])),
     ('double_Utube_independent', np.array([0.2, 0.15]), np.array([-3000., 2000.]), None, np.array([1., 2., 3., 1.]), np.array([8.15037424, -2.85931237])),
@@ -468,7 +468,7 @@ def test_inlet_temperature_independent(
 
 # Test get_borehole_heat_extraction_rate
 @pytest.mark.parametrize(
-    "pipe_fixture, m_flow, T_f_in, segment_ratios, T_b, expected", [
+    "pipe_fixture, m_flow, T_f_in, segment_ratios, t_b, expected", [
     # Double U-tube
     ('double_Utube_independent', np.array([0.2, 0.15]), np.array([5., -1.]), None, 1., -956.00963184),
     ('double_Utube_independent', np.array([0.2, 0.15]), np.array([5., -1.]), None, np.array([1., 2., 3., 1.]), np.array([-311.65264343, -12.22888682, 289.43868666, -320.65369703])),
@@ -492,7 +492,7 @@ def test_borehole_heat_extraction_rate_independent(
 
 # Test get_fluid_heat_extraction_rate
 @pytest.mark.parametrize(
-    "pipe_fixture, m_flow, T_f_in, segment_ratios, T_b, expected", [
+    "pipe_fixture, m_flow, T_f_in, segment_ratios, t_b, expected", [
     # Double U-tube
     ('double_Utube_independent', np.array([0.2, 0.15]), np.array([5., -1.]), None, 1., np.array([-1853.37094997, 897.36131814])),
     ('double_Utube_independent', np.array([0.2, 0.15]), np.array([5., -1.]), None, np.array([1., 2., 3., 1.]), np.array([-1533.81766537, 1178.72112475])),
@@ -516,7 +516,7 @@ def test_fluid_heat_extraction_rate_independent(
 
 # Test get_total_heat_extraction_rate
 @pytest.mark.parametrize(
-    "pipe_fixture, m_flow, T_f_in, segment_ratios, T_b, expected", [
+    "pipe_fixture, m_flow, T_f_in, segment_ratios, t_b, expected", [
     # Double U-tube
     ('double_Utube_independent', np.array([0.2, 0.15]), np.array([5., -1.]), None, 1., -956.0096318353349),
     ('double_Utube_independent', np.array([0.2, 0.15]), np.array([5., -1.]), None, np.array([1., 2., 3., 1.]), -355.0965406202829),
