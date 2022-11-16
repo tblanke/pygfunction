@@ -1016,10 +1016,10 @@ class SingleUTube(_BasePipe):
 
     """
     def __init__(self, pos, r_in, r_out, borehole, k_s, k_g, R_fp, J=2):
+        super().__init__(borehole)
         self.pos = pos
         self.r_in = r_in
         self.r_out = r_out
-        self.b = borehole
         self.k_s = k_s
         self.k_g = k_g
         self.R_fp = R_fp
