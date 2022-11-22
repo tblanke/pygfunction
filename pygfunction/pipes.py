@@ -2216,7 +2216,8 @@ class Coaxial(SingleUTube):
 
     """
 
-    def __init__(self, pos, r_in, r_out, borehole, k_s, k_g, R_ff, R_fp, J=2):
+    def __init__(self, pos: List[Tuple[float, float]], r_in: NDArray[np.float64], r_out: NDArray[np.float64], borehole: Borehole, k_s: float, k_g: float, R_ff: float,
+                 R_fp: float, J: int = 2):
         super().__init__(pos, r_in, r_out, borehole, k_s, k_g, R_fp, J)
         if isinstance(pos, tuple):
             pos = [pos]
@@ -2277,7 +2278,7 @@ class Coaxial(SingleUTube):
         self._initialize_stored_coefficients()
         return
 
-    def visualize_pipes(self):
+    def visualize_pipes(self) -> plt.Figure:
         """
         Plot the cross-section view of the borehole.
 
@@ -2350,7 +2351,7 @@ class Coaxial(SingleUTube):
 
         return fig
 
-    def _check_geometry(self):
+    def _check_geometry(self) -> bool:
         """ Verifies the inputs to the pipe object and raises an error if
             the geometry is not valid.
         """
@@ -2423,7 +2424,7 @@ class ThermalResistances:
 
     def __init__(self, pos: Optional[List[Tuple[float, float]]] = None, r_out: Optional[NDArray[np.float64]] = None, r_b: Optional[float] = None,
                  k_s: Optional[float] = None, k_g: Optional[float] = None, R_fp: Optional[NDArray[np.float64]] = None, J: Optional[int] = None,
-                 R: Optional[float] = None, Rd: Optional[float] = None):
+                 R: Optional[NDArray[np.float64]] = None, Rd: Optional[NDArray[np.float64]] = None):
         self.pos: Optional[List[Tuple[float, float]]] = pos
         self.r_out: Optional[NDArray[np.float64]] = r_out
         self.r_b: Optional[float] = r_b
@@ -2431,8 +2432,8 @@ class ThermalResistances:
         self.k_g: Optional[float] = k_g
         self.R_fp: Optional[NDArray[np.float64]] = R_fp
         self.J: Optional[int] = J
-        self.R: Optional[float] = R
-        self.Rd: Optional[float] = Rd
+        self.R: Optional[NDArray[np.float64]] = R
+        self.Rd: Optional[NDArray[np.float64]] = Rd
 
 
 _thermal_resistances: ThermalResistances = ThermalResistances()
@@ -2470,7 +2471,7 @@ def _compare_thermal_resistances_inputs(pos: List[Tuple[float, float]], r_out: N
         True if the inputs are the same as the content of the dictionnary.
 
     """
-    # Return False if dictionnary is empty
+    # Return False if class is empty
     for arg in ('pos', 'r_out', 'r_b', 'k_s', 'k_g', 'R_fp', 'J'):
         if getattr(_thermal_resistances, arg) is None:
             return False
@@ -2494,7 +2495,8 @@ def _compare_thermal_resistances_inputs(pos: List[Tuple[float, float]], r_out: N
     return True
 
 
-def thermal_resistances(pos: List[Tuple[float, float]], r_out, r_b, k_s, k_g, R_fp, J=2):
+def thermal_resistances(pos: List[Tuple[float, float]], r_out: Optional[float, NDArray[np.float64]], r_b: float, k_s: float, k_g: float, R_fp: float,
+                        J: int = 2) -> Tuple[NDArray[np.float64], NDArray[np.float64]]:
     """
     Evaluate thermal resistances and delta-circuit thermal resistances.
 
@@ -2622,7 +2624,7 @@ def thermal_resistances(pos: List[Tuple[float, float]], r_out, r_b, k_s, k_g, R_
     return R, Rd
 
 
-def borehole_thermal_resistance(pipe, m_flow_borehole, cp_f):
+def borehole_thermal_resistance(pipe: _BasePipe, m_flow_borehole: float, cp_f: float) -> float:
     """
     Evaluate the effective borehole thermal resistance, defined by:
 
@@ -2680,13 +2682,10 @@ def borehole_thermal_resistance(pipe, m_flow_borehole, cp_f):
     # Borehole length
     H = pipe.b.H
     # Effective borehole thermal resistance
-    R_b = -0.5 * H * (1. + a_out) / a_Q
-
-    return R_b
+    return -0.5 * H * (1. + a_out) / a_Q
 
 
-def fluid_friction_factor_circular_pipe(
-        m_flow_pipe, r_in, mu_f, rho_f, epsilon, tol=1.0e-6):
+def fluid_friction_factor_circular_pipe(m_flow_pipe: float, r_in: float, mu_f: float, rho_f: float, epsilon: float, tol: float = 1.0e-6) -> float:
     """
     Evaluate the Darcy-Weisbach friction factor.
 
@@ -2728,23 +2727,22 @@ def fluid_friction_factor_circular_pipe(
 
     if Re < 2.3e3:
         # Darcy friction factor for laminar flow
-        fDarcy = 64.0 / Re
-    else:
-        # Colebrook-White equation for rough pipes
-        fDarcy = 0.02
-        df = 1.0e99
-        while abs(df / fDarcy) > tol:
-            one_over_sqrt_f = -2.0 * np.log10(E / 3.7
-                                              + 2.51 / (Re * np.sqrt(fDarcy)))
-            fDarcy_new = 1.0 / one_over_sqrt_f ** 2
-            df = fDarcy_new - fDarcy
-            fDarcy = fDarcy_new
+        return 64.0 / Re
+    # Colebrook-White equation for rough pipes
+    fDarcy = 0.02
+    df = 1.0e99
+    while abs(df / fDarcy) > tol:
+        one_over_sqrt_f = -2.0 * np.log10(E / 3.7
+                                          + 2.51 / (Re * np.sqrt(fDarcy)))
+        fDarcy_new = 1.0 / one_over_sqrt_f ** 2
+        df = fDarcy_new - fDarcy
+        fDarcy = fDarcy_new
 
     return fDarcy
 
 
-def convective_heat_transfer_coefficient_circular_pipe(
-        m_flow_pipe, r_in, mu_f, rho_f, k_f, cp_f, epsilon):
+def convective_heat_transfer_coefficient_circular_pipe(m_flow_pipe: float, r_in: float, mu_f: float, rho_f: float, k_f: float, cp_f: float,
+                                                       epsilon: float) -> float:
     """
     Evaluate the convective heat transfer coefficient for circular pipes.
 
@@ -2831,13 +2829,11 @@ def convective_heat_transfer_coefficient_circular_pipe(
     else:
         Nu = 3.66
 
-    h_fluid = k_f * Nu / D
-
-    return h_fluid
+    return k_f * Nu / D
 
 
-def convective_heat_transfer_coefficient_concentric_annulus(
-        m_flow_pipe, r_a_in, r_a_out, mu_f, rho_f, k_f, cp_f, epsilon):
+def convective_heat_transfer_coefficient_concentric_annulus(m_flow_pipe: float, r_a_in: float, r_a_out: float, mu_f: float, rho_f: float, k_f: float,
+                                                            cp_f: float, epsilon: float) -> Tuple[float, float]:
     """
     Evaluate the inner and outer convective heat transfer coefficient for the
     annulus region of a concentric pipe.
@@ -2957,7 +2953,7 @@ def convective_heat_transfer_coefficient_concentric_annulus(
     return h_fluid_a_in, h_fluid_a_out
 
 
-def conduction_thermal_resistance_circular_pipe(r_in, r_out, k_p):
+def conduction_thermal_resistance_circular_pipe(r_in: float, r_out: float, k_p: float) -> float:
     """
     Evaluate the conduction thermal resistance for circular pipes.
 
@@ -2979,14 +2975,12 @@ def conduction_thermal_resistance_circular_pipe(r_in, r_out, k_p):
     --------
 
     """
-    R_p = np.log(r_out / r_in) / (2 * pi * k_p)
-
-    return R_p
+    return np.log(r_out / r_in) / (2 * pi * k_p)
 
 
-def multipole(pos: List[Tuple[float, float]], r_out, r_b, k_s, k_g, R_fp, T_b, q_p, J,
-              x_T=np.empty(0), y_T=np.empty(0),
-              eps=1e-5, it_max=100):
+def multipole(pos: List[Tuple[float, float]], r_out: Union[float, NDArray[np.float64]], r_b: float, k_s: float, k_g: float, R_fp: float, T_b: float,
+              q_p:  NDArray[np.float64], J: int, x_T: Optional[NDArray[np.float64]] = None, y_T=np.empty(0), eps: float = 1e-5,
+              it_max: int = 100) -> Tuple[NDArray[np.float64], NDArray[np.float64], int, float]:
     """
     Multipole method to calculate borehole thermal resistances in a borehole
     heat exchanger.
@@ -3055,6 +3049,7 @@ def multipole(pos: List[Tuple[float, float]], r_out, r_b, k_s, k_g, R_fp, T_b, q
         r_out = np.full(n_p, r_out)
     if np.isscalar(R_fp):
         R_fp = np.full(n_p, R_fp)
+    x_T = np.empty(0) if x_T is None else x_T
 
     # -------------------------------------
     # Thermal resistance matrix R0 (EQ. 33)
