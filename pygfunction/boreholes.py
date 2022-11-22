@@ -151,7 +151,7 @@ class Borehole(object):
         """
         if segment_ratios is None:
             segment_ratios = np.full(nSegments, 1. / nSegments)
-        z = self._segment_edges(nSegments, segment_ratios=segment_ratios)[:-1]
+        z = self.segment_edges(nSegments, segment_ratios=segment_ratios)[:-1]
         boreSegments = []
         for z_i, ratios in zip(z, segment_ratios):
             # Divide borehole into segments of equal length
@@ -169,7 +169,7 @@ class Borehole(object):
                          orientation=self.orientation))
         return boreSegments
 
-    def _segment_edges(self, nSegments, segment_ratios=None):
+    def segment_edges(self, nSegments, segment_ratios=None):
         """
         Linear coordinates of the segment edges.
 
@@ -194,7 +194,7 @@ class Borehole(object):
         Examples
         --------
         >>> b1 = gt.boreholes.Borehole(H=150., D=4., r_b=0.075, x=5., y=0.)
-        >>> b1._segment_edges(5)
+        >>> b1.segment_edges(5)
 
         """
         if segment_ratios is None:
@@ -232,7 +232,7 @@ class Borehole(object):
         """
         if segment_ratios is None:
             segment_ratios = np.full(nSegments, 1. / nSegments)
-        z = self._segment_edges(nSegments, segment_ratios=segment_ratios)[:-1] \
+        z = self.segment_edges(nSegments, segment_ratios=segment_ratios)[:-1] \
             + segment_ratios * self.H / 2
         return z
 
@@ -513,7 +513,7 @@ class _EquivalentBorehole(object):
         Examples
         --------
         >>> b1 = gt.boreholes.Borehole(H=150., D=4., r_b=0.075, x=5., y=0.)
-        >>> b1._segment_edges(5)
+        >>> b1.segment_edges(5)
 
         """
         if segment_ratios is None:

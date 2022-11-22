@@ -4,11 +4,21 @@ import numpy as np
 import numpy.polynomial.polynomial as poly
 from scipy.special import erf
 import warnings
-from typing import Tuple
+from typing import Tuple, Dict
 from numpy.typing import NDArray
 
 
-def cardinal_point(direction):
+def cardinal_point(direction: str) -> float:
+    """
+    cardinal point\n
+    Parameters
+    ----------
+    direction : str
+        direction
+    Returns
+    -------
+        float : position in Grad
+    """
     accepted_inputs = ['E', 'ENE', 'NE', 'NNE',
                        'N', 'NNW', 'NW', 'WNW',
                        'W', 'WSW', 'SW', 'SSW',
@@ -18,9 +28,7 @@ def cardinal_point(direction):
         raise ValueError("The indicated direction {} is not encompassed in the "
                          "cardinal point function.".format(direction))
     # Create the cardinal compass
-    compass = {}
-    for i, pointer in enumerate(accepted_inputs):
-        compass[pointer] = i * np.pi / 8.
+    compass: Dict[str: float] = {pointer: i * np.pi / 8. for i, pointer in enumerate(accepted_inputs)}
     return compass[direction]
 
 
