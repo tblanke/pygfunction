@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from  __future__ import annotations
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.typing import NDArray
@@ -9,7 +10,7 @@ from scipy.spatial.distance import pdist
 from .utilities import _initialize_figure, _format_axes, _format_axes_3d
 
 
-class Borehole(object):
+class Borehole:
     """
     Contains information regarding the dimensions and position of a borehole.
 
@@ -50,7 +51,7 @@ class Borehole(object):
              f' orientation={self.orientation})')
         return s
 
-    def distance(self, target):
+    def distance(self, target: Borehole):
         """
         Evaluate the distance between the current borehole and a target
         borehole.
@@ -72,6 +73,7 @@ class Borehole(object):
 
         Examples
         --------
+        >>> import pygfunction as gt
         >>> b1 = gt.boreholes.Borehole(H=150., D=4., r_b=0.075, x=0., y=0.)
         >>> b2 = gt.boreholes.Borehole(H=150., D=4., r_b=0.075, x=5., y=0.)
         >>> b1.distance(b2)
@@ -82,7 +84,7 @@ class Borehole(object):
                   np.sqrt((self.x - target.x)**2 + (self.y - target.y)**2))
         return dis
 
-    def is_tilted(self):
+    def is_tilted(self) -> bool:
         """
         Returns true if the borehole is inclined.
 
@@ -94,7 +96,7 @@ class Borehole(object):
         """
         return self._is_tilted
 
-    def is_vertical(self):
+    def is_vertical(self) -> bool:
         """
         Returns true if the borehole is vertical.
 
@@ -117,6 +119,7 @@ class Borehole(object):
 
         Examples
         --------
+        >>> import pygfunction as gt
         >>> b1 = gt.boreholes.Borehole(H=150., D=4., r_b=0.075, x=5., y=0.)
         >>> b1.position()
         (5.0, 0.0)

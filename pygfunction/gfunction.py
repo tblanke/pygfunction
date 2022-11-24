@@ -850,7 +850,7 @@ class gFunction(object):
         # correctly assign the variables self.boreholes and self.network
         if isinstance(boreholes_or_network, Network):
             self.network = boreholes_or_network
-            self.boreholes = boreholes_or_network.b
+            self.boreholes = boreholes_or_network.boreholes
             # If a network is provided and no boundary condition is provided,
             # use 'MIFT'
             if self.boundary_condition is None:
@@ -865,7 +865,7 @@ class gFunction(object):
         # If the 'equivalent' solver is selected for the 'MIFT' condition,
         # switch to the 'similarities' solver if boreholes are in series
         if self.boundary_condition == 'MIFT' and  self.method.lower() == 'equivalent':
-            if not np.all(np.array(self.network.c, dtype=int) == -1):
+            if not np.all(np.array(self.network.connectivity, dtype=int) == -1):
                 warnings.warn(
                     "\nSolver 'equivalent' is only valid for "
                     "parallel-connected boreholes. Calculations will use the "
@@ -882,8 +882,8 @@ class gFunction(object):
                     "'similarities' solver instead.")
                 self.method = 'similarities'
             elif not np.all(
-                    [np.allclose(self.network.p[0]._Rd, pipe._Rd)
-                     for pipe in self.network.p]):
+                    [np.allclose(self.network.pipes[0]._Rd, pipe._Rd)
+                     for pipe in self.network.pipes]):
                 warnings.warn(
                     "\nSolver 'equivalent' is only valid for boreholes with "
                     "the same piping  configuration. Calculations will use "
@@ -1623,7 +1623,7 @@ class _BaseSolver(object):
                             self.network.cp_f,
                             self.nBoreSegments,
                             segment_ratios=self.segment_ratios)
-                    k_s = self.network.p[0].k_s
+                    k_s = self.network.pipes[0].k_s
                     A = np.block(
                         [[h_dt,
                           -np.eye(self.nSources, dtype=self.dtype),
@@ -1645,7 +1645,7 @@ class _BaseSolver(object):
                     # The gFunction is equal to the effective borehole wall
                     # temperature
                     # Outlet fluid temperature
-                    T_f_out = T_f_in - 2*pi*self.network.p[0].k_s*H_tot/(
+                    T_f_out = T_f_in - 2 * pi * self.network.pipes[0].k_s * H_tot / (
                         np.sum(self.network.m_flow_network*self.network.cp_f))
                     # Average fluid temperature
                     T_f = 0.5*(T_f_in + T_f_out)
@@ -1654,7 +1654,7 @@ class _BaseSolver(object):
                         self.network, self.network.m_flow_network,
                         self.network.cp_f)
                     # Effective borehole wall temperature
-                    T_b_eff = T_f - 2*pi*self.network.p[0].k_s*R_field
+                    T_b_eff = T_f - 2 * pi * self.network.pipes[0].k_s * R_field
                     gFunc[p] = T_b_eff
         # Store temperature and heat extraction rate profiles
         if self.profiles:
@@ -3739,7 +3739,7 @@ class _Equivalent(_BaseSolver):
         self.dis = eqField.unique_distance(eqField, self.disTol)[0][1:]
 
         if self.boundary_condition == 'MIFT':
-            pipes = [self.network.p[self.clusters.index(i)]
+            pipes = [self.network.pipes[self.clusters.index(i)]
                      for i in range(self.nEqBoreholes)]
             self.network = _EquivalentNetwork(
                 self.boreholes,
@@ -4177,7 +4177,7 @@ class _Equivalent(_BaseSolver):
             # Verify that all boreholes have the same piping configuration
             # This is best done by comparing the matrix of thermal resistances.
             assert np.all(
-                [np.allclose(self.network.p[0]._Rd, pipe._Rd)
-                 for pipe in self.network.p]), \
+                [np.allclose(self.network.pipes[0]._Rd, pipe._Rd)
+                 for pipe in self.network.pipes]), \
                 "All boreholes must have the same piping configuration."
         return

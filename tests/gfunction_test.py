@@ -219,7 +219,7 @@ def test_gfunctions_MIFT(field, method, opts, expected, request):
     # Extract the g-function options from the fixture
     options = request.getfixturevalue(opts)
     # Mean borehole length [m]
-    H_mean = np.mean([b.H for b in network.b])
+    H_mean = np.mean([b.H for b in network.boreholes])
     alpha = 1e-6    # Ground thermal diffusivity [m2/s]
     # Bore field characteristic time [s]
     ts = H_mean**2 / (9 * alpha)

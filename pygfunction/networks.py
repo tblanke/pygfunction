@@ -1,9 +1,15 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 import numpy as np
 from scipy.linalg import block_diag
+from .boreholes import Borehole
+from .pipes import _BasePipe
+
+from typing import Union, Optional, Tuple, List
+from numpy.typing import NDArray
 
 
-class Network(object):
+class Network:
     """
     Class for networks of boreholes with series, parallel, and mixed
     connections between the boreholes.
@@ -20,7 +26,7 @@ class Network(object):
         List of boreholes included in the bore field.
     pipes : list of pipe objects
         List of pipes included in the bore field.
-    bore_connectivity : list, optional
+    connectivity : list, optional
         Index of fluid inlet into each borehole. -1 corresponds to a borehole
         connected to the bore field inlet. If this parameter is not provided,
         parallel connections between boreholes is used.
@@ -67,16 +73,16 @@ class Network(object):
        Environment, 25 (8), 1007-1022.
 
     """
-    def __init__(self, boreholes, pipes, bore_connectivity=None,
-                 m_flow_network=None, cp_f=None, nSegments=None,
-                 segment_ratios=None):
-        self.b = boreholes
-        self.H_tot = sum([b.H for b in self.b])
+    def __init__(self, boreholes: List[Borehole], pipes: List[_BasePipe], bore_connectivity: Optional[int] = None,
+                 m_flow_network: Optional[Union[float, NDArray[np.float64]]] = None, cp_f: Optional[float] = None, nSegments: Optional[int] = None,
+                 segment_ratios: Optional[Union[NDArray[np.float64], list]] = None):
+        self.boreholes = boreholes
+        self.H_tot = sum([b.H for b in self.boreholes])
         self.nBoreholes = len(boreholes)
-        self.p = pipes
+        self.pipes = pipes
         if bore_connectivity is None:
             bore_connectivity = [-1]*self.nBoreholes
-        self.c = bore_connectivity
+        self.connectivity = bore_connectivity
         self.m_flow_network = m_flow_network
         self.cp_f = cp_f
 
@@ -96,12 +102,11 @@ class Network(object):
 
         # Initialize stored_coefficients
         self._initialize_coefficients_connectivity()
-        self._initialize_stored_coefficients(
-            m_flow_network, cp_f, nSegments, segment_ratios)
+        self._initialize_stored_coefficients(m_flow_network, cp_f, nSegments, segment_ratios)
 
-    def get_inlet_temperature(
-            self, T_f_in, T_b, m_flow_network, cp_f, nSegments,
-            segment_ratios=None):
+    def get_inlet_temperature(self, T_f_in: Union[float, NDArray[np.float64]], T_b: Union[float, NDArray[np.float64]],
+                              m_flow_network: Union[float, NDArray[np.float64]], cp_f: float, nSegments: Union[float, List[int]],
+                              segment_ratios: Optional[Union[NDArray[np.float64], list]] = None) -> NDArray[np.float64]:
         """
         Returns the inlet fluid temperatures of all boreholes.
 
@@ -144,9 +149,9 @@ class Network(object):
         T_f_in_borehole = a_in @ np.atleast_1d(T_f_in) + a_b @ T_b
         return T_f_in_borehole
 
-    def get_outlet_temperature(
-            self, T_f_in, T_b, m_flow_network, cp_f, nSegments,
-            segment_ratios=None):
+    def get_outlet_temperature(self, T_f_in: Union[float, NDArray[np.float64]], T_b: Union[float, NDArray[np.float64]],
+                               m_flow_network: Union[float, NDArray[np.float64]], cp_f: float, nSegments: Union[int, list],
+                               segment_ratios: Optional[Union[NDArray[np.float64], list]] = None) -> NDArray[np.float64]:
         """
         Returns the outlet fluid temperatures of all boreholes.
 
@@ -189,9 +194,9 @@ class Network(object):
         T_f_out = a_in @ np.atleast_1d(T_f_in) + a_b @ T_b
         return T_f_out
 
-    def get_borehole_heat_extraction_rate(
-            self, T_f_in, T_b, m_flow_network, cp_f, nSegments,
-            segment_ratios=None):
+    def get_borehole_heat_extraction_rate(self, T_f_in: Union[float, NDArray[np.float64]], T_b: Union[float, NDArray[np.float64]],
+                                          m_flow_network: Union[float, NDArray[np.float64]], cp_f: float, nSegments: Union[int, List[int]],
+                                          segment_ratios: Optional[Union[NDArray[np.float64], list]] = None) -> NDArray[np.float64]:
         """
         Returns the heat extraction rates of all boreholes.
 
@@ -233,9 +238,9 @@ class Network(object):
 
         return Q_b
 
-    def get_fluid_heat_extraction_rate(
-            self, T_f_in, T_b, m_flow_network, cp_f, nSegments,
-            segment_ratios=None):
+    def get_fluid_heat_extraction_rate(self, T_f_in: Union[float, NDArray[np.float64]], T_b: Union[float, NDArray[np.float64]], 
+                                       m_flow_network: Union[float, NDArray[np.float64]], cp_f: float, nSegments: Union[int, List[int]], 
+                                       segment_ratios: Optional[Union[NDArray[np.float64], list]] = None) -> NDArray[np.float64]:
         """
         Returns the total heat extraction rates of all boreholes.
 
@@ -277,9 +282,9 @@ class Network(object):
 
         return Q_f
 
-    def get_network_inlet_temperature(
-            self, Q_t, T_b, m_flow_network, cp_f, nSegments,
-            segment_ratios=None):
+    def get_network_inlet_temperature(self, Q_t: Union[float, NDArray[np.float64]], T_b: Union[float, NDArray[np.float64]], 
+                                      m_flow_network: Union[float, NDArray[np.float64]], cp_f: float, nSegments: Union[int, List[int]], 
+                                      segment_ratios: Optional[Union[NDArray[np.float64], list]] = None) -> NDArray[np.float64]:
         """
         Returns the inlet fluid temperature of the network.
 
@@ -325,9 +330,9 @@ class Network(object):
             T_f_in = T_f_in.item()
         return T_f_in
 
-    def get_network_outlet_temperature(
-            self, T_f_in, T_b, m_flow_network, cp_f, nSegments,
-            segment_ratios=None):
+    def get_network_outlet_temperature(self, T_f_in: Union[float, NDArray[np.float64]], T_b: Union[float, NDArray[np.float64]],
+                                       m_flow_network: Union[float, NDArray[np.float64]], cp_f: float, nSegments: Union[int, List[int]],
+                                       segment_ratios: Optional[Union[NDArray[np.float64], list]] = None) -> NDArray[np.float64]:
         """
         Returns the outlet fluid temperature of the network.
 
@@ -373,9 +378,9 @@ class Network(object):
             T_f_out = T_f_out.item()
         return T_f_out
 
-    def get_network_heat_extraction_rate(
-            self, T_f_in, T_b, m_flow_network, cp_f, nSegments,
-            segment_ratios=None):
+    def get_network_heat_extraction_rate(self, T_f_in: Union[float, NDArray[np.float64]], T_b: Union[float, NDArray[np.float64]], 
+                                         m_flow_network: Union[float, NDArray[np.float64]], cp_f: float, nSegments: Union[int, List[int]],
+                                         segment_ratios: Optional[Union[NDArray[np.float64], list]] = None) -> NDArray[np.float64]:
         """
         Returns the total heat extraction rate of the network.
 
@@ -420,8 +425,9 @@ class Network(object):
 
         return Q_t
 
-    def coefficients_inlet_temperature(
-            self, m_flow_network, cp_f, nSegments, segment_ratios=None):
+    def coefficients_inlet_temperature(self, m_flow_network: Union[float, NDArray[np.float64]], cp_f: float, nSegments: Union[int, List[int]], 
+                                       segment_ratios: Optional[Union[NDArray[np.float64], list]] = None
+                                       ) -> Tuple[NDArray[np.float64], NDArray[np.float64]]:
         """
         Build coefficient matrices to evaluate intlet fluid temperatures of all
         boreholes.
@@ -480,7 +486,7 @@ class Network(object):
             AB = list(zip(*[pipe.coefficients_outlet_temperature(
                 m_flow, cp, nSegments, segment_ratios=ratios)
                 for pipe, m_flow, cp, nSegments, ratios in zip(
-                        self.p,
+                        self.pipes,
                         self._m_flow_borehole,
                         self._cp_borehole,
                         self.nSegments,
@@ -500,8 +506,8 @@ class Network(object):
 
         return a_in, a_b
 
-    def coefficients_outlet_temperature(
-            self, m_flow_network, cp_f, nSegments, segment_ratios=None):
+    def coefficients_outlet_temperature(self, m_flow_network: Union[float, NDArray[np.float64]], cp_f: float, nSegments: Union[int, List[int]], 
+                                        segment_ratios: Optional[Union[NDArray[np.float64], list]] = None) -> Tuple[NDArray[np.float64], NDArray[np.float64]]:
         """
         Build coefficient matrices to evaluate outlet fluid temperatures of all
         boreholes.
@@ -560,7 +566,7 @@ class Network(object):
             AB = list(zip(*[pipe.coefficients_outlet_temperature(
                 m_flow, cp, nSegments, segment_ratios=ratios)
                 for pipe, m_flow, cp, nSegments, ratios in zip(
-                        self.p,
+                        self.pipes,
                         self._m_flow_borehole,
                         self._cp_borehole,
                         self.nSegments,
@@ -580,8 +586,9 @@ class Network(object):
 
         return a_in, a_b
 
-    def coefficients_network_inlet_temperature(
-            self, m_flow_network, cp_f, nSegments, segment_ratios=None):
+    def coefficients_network_inlet_temperature(self, m_flow_network: Union[float, NDArray[np.float64]], cp_f: float, nSegments: Union[int, List[int]], 
+                                               segment_ratios: Optional[Union[NDArray[np.float64], list]] = None
+                                               ) -> Tuple[NDArray[np.float64], NDArray[np.float64]]:
         """
         Build coefficient matrices to evaluate intlet fluid temperature of the
         network.
@@ -640,14 +647,13 @@ class Network(object):
             a_b = -b_in_inv.dot(b_b)
 
             # Store coefficients
-            self._set_stored_coefficients(
-                m_flow_network, cp_f, nSegments, segment_ratios, (a_qf, a_b),
-                method_id)
+            self._set_stored_coefficients(m_flow_network, cp_f, nSegments, segment_ratios, (a_qf, a_b), method_id)
 
         return a_qf, a_b
 
-    def coefficients_network_outlet_temperature(
-            self, m_flow_network, cp_f, nSegments, segment_ratios=None):
+    def coefficients_network_outlet_temperature(self, m_flow_network: Union[float, NDArray[np.float64]], cp_f: float, nSegments: Union[int, List[int]], 
+                                                segment_ratios: Optional[Union[NDArray[np.float64], list]] = None
+                                                ) -> Tuple[NDArray[np.float64], NDArray[np.float64]]:
         """
         Build coefficient matrices to evaluate outlet fluid temperature of the
         network.
@@ -711,8 +717,9 @@ class Network(object):
 
         return a_in, a_b
 
-    def coefficients_borehole_heat_extraction_rate(
-            self, m_flow_network, cp_f, nSegments, segment_ratios=None):
+    def coefficients_borehole_heat_extraction_rate(self, m_flow_network: Union[float, NDArray[np.float64]], cp_f: float, nSegments: Union[int, List[int]], 
+                                                   segment_ratios: Optional[Union[NDArray[np.float64], list]] = None
+                                                   ) -> Tuple[NDArray[np.float64], NDArray[np.float64]]:
         """
         Build coefficient matrices to evaluate heat extraction rates of all
         boreholes segments.
@@ -771,7 +778,7 @@ class Network(object):
             AB = list(zip(*[pipe.coefficients_borehole_heat_extraction_rate(
                 m_flow, cp, nSegments, segment_ratios=ratios)
                 for pipe, m_flow, cp, nSegments, ratios in zip(
-                        self.p,
+                        self.pipes,
                         self._m_flow_borehole,
                         self._cp_borehole,
                         self.nSegments,
@@ -790,8 +797,9 @@ class Network(object):
 
         return a_in, a_b
 
-    def coefficients_fluid_heat_extraction_rate(
-            self, m_flow_network, cp_f, nSegments, segment_ratios=None):
+    def coefficients_fluid_heat_extraction_rate(self, m_flow_network: Union[float, NDArray[np.float64]], cp_f: float, nSegments: Union[int, List[int]], 
+                                                segment_ratios: Optional[Union[NDArray[np.float64], list]] = None
+                                                ) -> Tuple[NDArray[np.float64], NDArray[np.float64]]:
         """
         Build coefficient matrices to evaluate heat extraction rates of all
         boreholes.
@@ -850,7 +858,7 @@ class Network(object):
             AB = list(zip(*[pipe.coefficients_fluid_heat_extraction_rate(
                 m_flow, cp, nSegments, segment_ratios=ratios)
                 for pipe, m_flow, cp, nSegments, ratios in zip(
-                        self.p,
+                        self.pipes,
                         self._m_flow_borehole,
                         self._cp_borehole,
                         self.nSegments,
@@ -869,8 +877,9 @@ class Network(object):
 
         return a_in, a_b
 
-    def coefficients_network_heat_extraction_rate(
-            self, m_flow_network, cp_f, nSegments, segment_ratios=None):
+    def coefficients_network_heat_extraction_rate(self, m_flow_network: Union[float, NDArray[np.float64]], cp_f: float, nSegments: Union[int, List[int]], 
+                                                  segment_ratios: Optional[Union[NDArray[np.float64], list]] = None
+                                                  ) -> Tuple[NDArray[np.float64], NDArray[np.float64]]:
         """
         Build coefficient matrices to evaluate total heat extraction rate of
         the network.
@@ -935,7 +944,7 @@ class Network(object):
 
         return a_in, a_b
 
-    def _coefficients_mixing(self, m_flow_network):
+    def _coefficients_mixing(self, m_flow_network: Union[float, NDArray[np.float64]]) -> NDArray[np.float64]:
         """
         Returns coefficients for the relation:
 
@@ -980,19 +989,18 @@ class Network(object):
         for i in range(self.nInlets):
             self._c_in[self.iInlets[i], 0] = 1.
         for i in range(self.nBoreholes):
-            if not self.c[i] == -1:
-                self._c_out[i, self.c[i]] = 1.
+            if not self.connectivity[i] == -1:
+                self._c_out[i, self.connectivity[i]] = 1.
 
         return
 
-    def _initialize_stored_coefficients(
-            self, m_flow_network, cp_f, nSegments, segment_ratios):
+    def _initialize_stored_coefficients(self, m_flow_network: Union[float, NDArray[np.float64]], cp_f: float, nSegments: Union[int, List[int]], 
+                                        segment_ratios: Union[NDArray[np.float64], list]):
         nMethods = 7    # Number of class methods
-        self._stored_coefficients = [() for i in range(nMethods)]
-        self._stored_m_flow_cp = [np.empty(self.nInlets)*np.nan
-                                  for i in range(nMethods)]
-        self._stored_nSegments = [np.nan for i in range(nMethods)]
-        self._stored_segment_ratios = [np.nan for i in range(nMethods)]
+        self._stored_coefficients: List[Tuple[NDArray[np.float64], NDArray[np.float64]]] = [(np.nan, np.nan) for _ in range(nMethods)]
+        self._stored_m_flow_cp = [np.empty(self.nInlets)*np.nan for _ in range(nMethods)]
+        self._stored_nSegments = [np.nan for _ in range(nMethods)]
+        self._stored_segment_ratios = [np.nan for _ in range(nMethods)]
         self._m_flow_cp_model_variables = np.empty(self.nInlets)*np.nan
         self._nSegments_model_variables = np.nan
         self._segment_ratios_model_variables = np.nan
@@ -1020,33 +1028,24 @@ class Network(object):
 
         return
 
-    def _set_stored_coefficients(
-            self, m_flow_network, cp_f, nSegments, segment_ratios,
-            coefficients, method_id):
+    def _set_stored_coefficients(self, m_flow_network: float, cp_f: float, nSegments: int, segment_ratios: Union[NDArray[np.float64], list],
+                                 coefficients: Tuple[NDArray[np.float64], NDArray[np.float64]], method_id: int):
         self._stored_coefficients[method_id] = coefficients
         self._stored_m_flow_cp[method_id] = m_flow_network*cp_f
         self._stored_nSegments[method_id] = nSegments
         self._stored_segment_ratios[method_id] = segment_ratios
 
-        return
+    def _get_stored_coefficients(self, method_id: int) -> tuple:
+        return self._stored_coefficients[method_id]
 
-    def _get_stored_coefficients(self, method_id):
-        coefficients = self._stored_coefficients[method_id]
-
-        return coefficients
-
-    def _check_mixing_coefficients(self, m_flow_network, tol=1e-6):
+    def _check_mixing_coefficients(self, m_flow_network: Union[float, NDArray[np.float64]], tol: float = 1e-6) -> bool:
         mixing_m_flow = self._mixing_m_flow
         if np.all(np.abs(m_flow_network - mixing_m_flow) < np.abs(mixing_m_flow)*tol):
-            check = True
-        else:
-            check = False
+            return True
+        return False
 
-        return check
-
-    def _check_coefficients(
-            self, m_flow_network, cp_f, nSegments, segment_ratios, method_id,
-            tol=1e-6):
+    def _check_coefficients(self, m_flow_network: Union[float, NDArray[np.float64]], cp_f: float, nSegments: Union[int, List[int]],
+                            segment_ratios: Union[NDArray[np.float64], list], method_id: int, tol: float = 1e-6) -> bool:
         stored_m_flow_cp = self._stored_m_flow_cp[method_id]
         stored_nSegments = self._stored_nSegments[method_id]
         stored_segment_ratios = self._stored_segment_ratios[method_id]
@@ -1054,18 +1053,16 @@ class Network(object):
             check_ratios = True
         elif isinstance(stored_segment_ratios, list) and isinstance(segment_ratios, list):
             check_ratios = (np.all([len(segment_ratios[i]) == len(stored_segment_ratios[i]) for i in range(len(segment_ratios))]) and
-                            np.all([np.all(np.abs(segment_ratios[i] - stored_segment_ratios[i]) < np.abs(stored_segment_ratios[i])*tol) for i in range(len(segment_ratios))]))
+                            np.all([np.all(np.abs(segment_ratios[i] - stored_segment_ratios[i]) < np.abs(stored_segment_ratios[i])*tol) for i in
+                                    range(len(segment_ratios))]))
         else:
             check_ratios = False
-        if (np.all(np.abs(m_flow_network*cp_f - stored_m_flow_cp) < np.abs(stored_m_flow_cp)*tol)
-            and nSegments == stored_nSegments and check_ratios):
-            check = True
-        else:
-            check = False
+        if np.all(np.abs(m_flow_network * cp_f - stored_m_flow_cp) < np.abs(stored_m_flow_cp) * tol) and nSegments == stored_nSegments and check_ratios:
+            return True
+        return False
 
-        return check
-
-    def _format_inputs(self, m_flow_network, cp_f, nSegments, segment_ratios):
+    def _format_inputs(self, m_flow_network: Union[float, NDArray[np.float64]], cp_f: float, nSegments: Union[int, List[int]],
+                       segment_ratios: Union[NDArray[np.float64], list]):
         """
         Format mass flow rate and heat capacity inputs.
         """
@@ -1180,18 +1177,16 @@ class _EquivalentNetwork(Network):
        Environment, 25 (8), 1007-1022.
 
     """
-    def __init__(self, equivalentBoreholes, pipes, m_flow_network=None,
-                 cp_f=None, nSegments=None, segment_ratios=None):
+    def __init__(self, equivalentBoreholes, pipes: List[_BasePipe], boreholes: List[Borehole], m_flow_network=None, cp_f=None, nSegments=None,
+                 segment_ratios=None):
+        super().__init__(boreholes, pipes, m_flow_network, cp_f, nSegments, segment_ratios)
         self.b = equivalentBoreholes
         self.H_tot = sum([b.H*b.nBoreholes for b in self.b])
         self.nBoreholes = len(equivalentBoreholes)
         self.wBoreholes = np.array(
             [[b.nBoreholes for b in equivalentBoreholes]]).T
         self.nBoreholes_total = np.sum(self.wBoreholes)
-        self.p = pipes
         self.c = [-1]*self.nBoreholes
-        self.m_flow_network = m_flow_network
-        self.cp_f = cp_f
 
         # Verify that borehole connectivity is valid
         iInlets, nInlets, iOutlets, nOutlets, iCircuit = _find_inlets_outlets(
@@ -1366,7 +1361,7 @@ class _EquivalentNetwork(Network):
                 'Incorrect format of the segment ratios list.')
 
 
-def network_thermal_resistance(network, m_flow_network, cp_f):
+def network_thermal_resistance(network: Network, m_flow_network: Union[float, NDArray[np.float64]], cp_f: float) -> float:
     """
     Evaluate the effective bore field thermal resistance.
 
@@ -1390,12 +1385,9 @@ def network_thermal_resistance(network, m_flow_network, cp_f):
         Effective bore field thermal resistance (m.K/W).
 
     """
-    # Number of boreholes
-    nBoreholes = len(network.b)
 
     # Total borehole length
     H_tot = network.H_tot
-
 
     # Coefficients for T_{f,out} = A_out*T_{f,in} + [B_out]*[t_b], and
     # Q_b = [A_Q]*T{f,in} + [B_Q]*[t_b]
@@ -1412,7 +1404,7 @@ def network_thermal_resistance(network, m_flow_network, cp_f):
     return R_field
 
 
-def _find_inlets_outlets(bore_connectivity, nBoreholes):
+def _find_inlets_outlets(bore_connectivity: List[int], nBoreholes: int) -> Tuple[List[int], int, List[int], int, List[int]]:
     """
     Finds the numbers of boreholes connected to the inlet and outlet of the
     network and the indices of the boreholes.
@@ -1431,12 +1423,11 @@ def _find_inlets_outlets(bore_connectivity, nBoreholes):
     """
     # Number and indices of inlets
     nInlets = bore_connectivity.count(-1)
-    iInlets = [i for i in range(nBoreholes) if bore_connectivity[i]==-1]
+    iInlets = [i for i in range(nBoreholes) if bore_connectivity[i] == -1]
     # Number and indices of outlets
     iOutlets = [i for i in range(nBoreholes) if i not in bore_connectivity]
     nOutlets = len(iOutlets)
-    iCircuit = [iInlets.index(_path_to_inlet(bore_connectivity, i)[-1])
-                for i in range(nBoreholes)]
+    iCircuit = [iInlets.index(_path_to_inlet(bore_connectivity, i)[-1]) for i in range(nBoreholes)]
     if not nInlets == nOutlets:
         raise ValueError(
             'The network should have as many inlets as outlets.')
@@ -1444,7 +1435,7 @@ def _find_inlets_outlets(bore_connectivity, nBoreholes):
     return iInlets, nInlets, iOutlets, nOutlets, iCircuit
 
 
-def _path_to_inlet(bore_connectivity, bore_index):
+def _path_to_inlet(bore_connectivity: List[int], bore_index: int) -> List[int]:
     """
     Returns the path from a borehole to the bore field inlet.
 
@@ -1477,7 +1468,7 @@ def _path_to_inlet(bore_connectivity, bore_index):
     return path
 
 
-def _verify_bore_connectivity(bore_connectivity, nBoreholes):
+def _verify_bore_connectivity(bore_connectivity: List[int], nBoreholes: int):
     """
     Verifies that borehole connectivity is valid.
 

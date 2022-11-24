@@ -4,7 +4,7 @@ import numpy as np
 from . import utilities
 
 
-class _LoadAggregation(object):
+class _LoadAggregation:
     """
     Base class for load aggregation schemes.
     """

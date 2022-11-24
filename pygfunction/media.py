@@ -92,20 +92,20 @@ class Fluid:
         # Prandlt number
         self.Pr = self.Prandlt_number()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'{self.__class__!s}\n' \
             + '\n'.join(
                 (f'{item!s} = {self.__dict__[item]}'
                  for item in sorted(self.__dict__)))
 
-    def append_to_dict(self, dnary):
+    def append_to_dict(self, dnary: dict):
         if len(list(dnary.keys())) == 0:
             for item in sorted(self.__dict__):
                 dnary[item] = []
         for item in sorted(self.__dict__):
             dnary[item].append(f'{self.__dict__[item]:.5E}')
 
-    def density(self):
+    def density(self) -> float:
         """
         Returns the density of the fluid (in kg/m3).
 
@@ -117,7 +117,7 @@ class Fluid:
         """
         return self.fluid.density(self.T_C)
 
-    def dynamic_viscosity(self):
+    def dynamic_viscosity(self) -> float:
         """
         Returns the dynamic viscosity of the fluid (in Pa.s, or N.s/m2).
 
@@ -129,7 +129,7 @@ class Fluid:
         """
         return self.fluid.viscosity(self.T_C)
 
-    def kinematic_viscosity(self):
+    def kinematic_viscosity(self) -> float:
         """
         Returns the kinematic viscosity of the fluid (in m2/s).
 
@@ -141,7 +141,7 @@ class Fluid:
         """
         return self.mu / self.rho
 
-    def specific_heat_capacity(self):
+    def specific_heat_capacity(self) -> float:
         """
         Returns the specific isobaric heat capacity of the fluid (J/kg.K).
 
@@ -153,7 +153,7 @@ class Fluid:
         """
         return self.fluid.specific_heat(self.T_C)
 
-    def volumetric_heat_capacity(self):
+    def volumetric_heat_capacity(self) -> float:
         """
         Returns the volumetric heat capacity of the fluid (J/m3.K).
 
@@ -165,7 +165,7 @@ class Fluid:
         """
         return self.rho * self.cp
 
-    def thermal_conductivity(self):
+    def thermal_conductivity(self) -> float:
         """
         Returns the thermal conductivity of the fluid (in W/m.K).
 
@@ -177,7 +177,7 @@ class Fluid:
         """
         return self.fluid.conductivity(self.T_C)
 
-    def Prandlt_number(self):
+    def Prandlt_number(self) -> float:
         """
         Returns the Prandtl of the fluid.
 
