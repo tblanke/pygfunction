@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import matplotlib.pyplot as plt
 import numpy as np
+from numpy.typing import NDArray
+from typing import Optional
 from scipy.constants import pi
 from scipy.spatial.distance import pdist
 
@@ -169,7 +171,7 @@ class Borehole(object):
                          orientation=self.orientation))
         return boreSegments
 
-    def segment_edges(self, nSegments, segment_ratios=None):
+    def segment_edges(self, nSegments: int, segment_ratios: Optional[NDArray[np.float64]]=None) -> NDArray[np.float64]:
         """
         Linear coordinates of the segment edges.
 
