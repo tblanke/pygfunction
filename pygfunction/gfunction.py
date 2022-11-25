@@ -4161,7 +4161,7 @@ class _Equivalent(_BaseSolver):
         assert not np.any([b.is_tilted() for b in self.boreholes]), \
             "Solver 'equivalent' can only handle vertical boreholes."
         if self.boundary_condition == 'MIFT':
-            assert np.all(np.array(self.network.c, dtype=int) == -1), \
+            assert np.all(np.array(self.network.connectivity, dtype=int) == -1), \
                 "Solver 'equivalent' is only valid for parallel-connected " \
                 "boreholes."
             assert type(self.network.m_flow_network) is float \

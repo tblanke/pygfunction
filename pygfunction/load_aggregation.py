@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
+from typing import Union, Optional, Tuple, List
+from numpy.typing import NDArray
 
 from . import utilities
 
@@ -8,13 +10,13 @@ class _LoadAggregation:
     """
     Base class for load aggregation schemes.
     """
-    def __init__(self, dt, tmax, nSources=1):
+    def __init__(self, dt: float, tmax: float, nSources: Optional[int] = 1):
         self.dt = dt                # Simulation time step
         self.tmax = tmax            # Maximum simulation time
         self.nSources = nSources    # Number of heat sources
         return
 
-    def initialize(self, g):
+    def initialize(self, g: float):
         raise NotImplementedError(
             'initialize class method not implemented, this '
             'method should do the start of simulation operations.')
@@ -25,12 +27,12 @@ class _LoadAggregation:
             'method should return a list of time values at which the '
             'thermal response factors are needed.')
 
-    def next_time_step(self, time):
+    def next_time_step(self, time: float):
         raise NotImplementedError(
             'next_time_step class method not implemented, this '
             'method should do the start of time step operations.')
 
-    def set_current_load(self, Q):
+    def set_current_load(self, Q: float):
         raise NotImplementedError(
             'set_current_load class method not implemented, this '
             'method should do the operations needed when setting current '
@@ -67,14 +69,13 @@ class ClaessonJaved(_LoadAggregation):
        load-aggregation method to calculate extraction temperatures of
        borehole heat exchangers. ASHRAE Transactions, 118 (1): 530–539.
     """
-    def __init__(self, dt, tmax, nSources=1, cells_per_level=5, **kwargs):
-        self.dt = dt                # Simulation time step
-        self.tmax = tmax            # Maximum simulation time
-        self.nSources = nSources    # Number of heat sources
+    def __init__(self, dt: float, tmax: float, nSources: Optional[int] = 1, cells_per_level: Optional[int] = 5, **kwargs):
+        super().__init__(dt, tmax, nSources)
         # Initialize load aggregation cells
         self._build_cells(dt, tmax, nSources, cells_per_level)
+        self.dg: NDArray[np.float64] = np.empty(0)
 
-    def initialize(self, g_d):
+    def initialize(self, g_d: NDArray[np.float64]):
         """
         Initialize the thermal aggregation scheme.
 
@@ -93,12 +94,12 @@ class ClaessonJaved(_LoadAggregation):
             If nSources=1, g_d can be 1 dimensional.
 
         """
-        if self.nSources==1:
-            g_d = g_d.reshape(1, 1, -1)
+        if self.nSources == 1:
+            g_d = g_d.reshape((1, 1, -1))
         # Build matrix of thermal response factor increments
         self.dg = np.zeros_like(g_d)
-        self.dg[:,:,0] = g_d[:,:,0]
-        self.dg[:,:,1:] = g_d[:,:,1:] - g_d[:,:,:-1]
+        self.dg[:, :, 0] = g_d[:, :, 0]
+        self.dg[:, :, 1:] = g_d[:, :, 1:] - g_d[:, :, :-1]
 
     def next_time_step(self, time):
         """

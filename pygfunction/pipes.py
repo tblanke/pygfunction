@@ -56,10 +56,10 @@ class _BasePipe(ABC):
         self.R_fp: float = 0.
         self.k_s: float = 0.
         self.k_g: float = 0.
-        self.pos: List[List[float]] = []
+        self.pos: List[Tuple[float, float]] = []
         self.r_in: float = 0.
         self.r_out: float = 0.
-        self.J: float = 0.
+        self.J: int = 1
 
     def get_temperature(
             self, z: Union[float, NDArray[np.float64]], T_f_in: Union[float, NDArray[np.float64]], t_b: Union[float, NDArray[np.float64]],
@@ -2221,10 +2221,15 @@ class Coaxial(SingleUTube):
                  R_ff: float, R_fp: float, J: int = 2):
         if isinstance(pos, tuple):
             pos = [pos]
-        super().__init__(pos, r_in[0], r_out[0], borehole, k_s, k_g, R_fp, J)
+        _BasePipe.__init__(self, borehole)
+        self.pos = pos
         self.r_in = r_in
         self.r_out = r_out
+        self.k_s = k_s
+        self.k_g = k_g
+        self.R_fp = R_fp
         self.R_ff = R_ff
+        self.J = J
         self.nPipes = 1
         self.nInlets = 1
         self.nOutlets = 1

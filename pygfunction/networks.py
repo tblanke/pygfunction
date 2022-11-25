@@ -934,8 +934,8 @@ class Network:
             # The total network heat extraction rate is the sum of heat
             # extraction rates from all boreholes:
             # [Q_{tot}] = [a_in]*[T_{f,n,in}] + [a_b]*[T_{b}]
-            a_in = np.reshape(np.sum(b_in, axis=0), (1,-1))
-            a_b = np.reshape(np.sum(b_b, axis=0), (1,-1))
+            a_in = np.reshape(np.sum(b_in, axis=0), (1, -1))
+            a_b = np.reshape(np.sum(b_b, axis=0), (1, -1))
 
             # Store coefficients
             self._set_stored_coefficients(
@@ -1177,8 +1177,9 @@ class _EquivalentNetwork(Network):
        Environment, 25 (8), 1007-1022.
 
     """
-    def __init__(self, equivalentBoreholes, pipes: List[_BasePipe], boreholes: List[Borehole], m_flow_network=None, cp_f=None, nSegments=None,
-                 segment_ratios=None):
+    def __init__(self, equivalentBoreholes, pipes: List[_BasePipe], boreholes: List[Borehole],
+                 m_flow_network: Optional[Union[float, NDArray[np.float64]]] = None, cp_f: Optional[float] = None,
+                 nSegments: Optional[int] = None, segment_ratios: Optional[Union[NDArray[np.float64], list]] = None):
         super().__init__(boreholes, pipes, m_flow_network, cp_f, nSegments, segment_ratios)
         self.b = equivalentBoreholes
         self.H_tot = sum([b.H*b.nBoreholes for b in self.b])
@@ -1207,8 +1208,8 @@ class _EquivalentNetwork(Network):
             m_flow_network, cp_f, nSegments, segment_ratios)
         return
 
-    def coefficients_network_heat_extraction_rate(
-            self, m_flow_network, cp_f, nSegments, segment_ratios=None):
+    def coefficients_network_heat_extraction_rate(self, m_flow_network: Union[float, NDArray[np.float64]], cp_f: float, nSegments: Union[int, List[int]],
+                                                  segment_ratios: Optional[Union[NDArray[np.float64], list]] = None):
         """
         Build coefficient matrices to evaluate total heat extraction rate of
         the network.
@@ -1263,8 +1264,8 @@ class _EquivalentNetwork(Network):
             # The total network heat extraction rate is the sum of heat
             # extraction rates from all boreholes:
             # [Q_{tot}] = [a_in]*[T_{f,n,in}] + [a_b]*[T_{b}]
-            a_in = np.reshape(np.sum(b_in*self.wBoreholes, axis=0), (1,-1))
-            a_b = np.reshape(np.sum(b_b*self.wBoreholes, axis=0), (1,-1))
+            a_in = np.reshape(np.sum(b_in*self.wBoreholes, axis=0), (1, -1))
+            a_b = np.reshape(np.sum(b_b*self.wBoreholes, axis=0), (1, -1))
 
             # Store coefficients
             self._set_stored_coefficients(
@@ -1273,7 +1274,7 @@ class _EquivalentNetwork(Network):
 
         return a_in, a_b
 
-    def _coefficients_mixing(self, m_flow_network):
+    def _coefficients_mixing(self, m_flow_network: Union[float, NDArray[np.float64]]) -> NDArray[np.float64]:
         """
         Returns coefficients for the relation:
 
@@ -1304,7 +1305,7 @@ class _EquivalentNetwork(Network):
             self._mixing_m_flow = m_flow_network
         return self._mix_out
 
-    def _format_inputs(self, m_flow_network, cp_f, nSegments, segment_ratios):
+    def _format_inputs(self, m_flow_network: NDArray[np.float64], cp_f: float, nSegments: Union[int, List[int]], segment_ratios: NDArray[np.float64]):
         """
         Format mass flow rate and heat capacity inputs.
         """
@@ -1312,11 +1313,9 @@ class _EquivalentNetwork(Network):
         # Mass flow rate in each fluid circuit
         m_flow_in = np.atleast_1d(m_flow_network)
         if len(m_flow_in) == 1:
-            m_flow_in = np.array(
-                [m_flow_network/self.nBoreholes_total for b in self.b])
+            m_flow_in = np.array([m_flow_network/self.nBoreholes_total] * len(self.b))
         elif not len(m_flow_in) == self.nInlets:
-            raise ValueError(
-                'Incorrect length of mass flow vector.')
+            raise ValueError('Incorrect length of mass flow vector.')
         self._m_flow_in = m_flow_in
 
         # Format heat capacity inputs
@@ -1325,11 +1324,9 @@ class _EquivalentNetwork(Network):
         if len(cp_in) == 1:
             cp_in = np.tile(cp_f, self.nInlets)
         elif not len(cp_in) == self.nInlets:
-            raise ValueError(
-                'Incorrect length of heat capacity vector.')
+            raise ValueError('Incorrect length of heat capacity vector.')
         elif not np.all(cp_in == cp_in[0]):
-            raise ValueError(
-                'The heat capacity should be the same in all circuits.')
+            raise ValueError('The heat capacity should be the same in all circuits.')
         self._cp_in = cp_in
 
         # Mass flow rate in boreholes
@@ -1357,8 +1354,7 @@ class _EquivalentNetwork(Network):
         elif isinstance(segment_ratios, list):
             self._segment_ratios = segment_ratios
         else:
-            raise ValueError(
-                'Incorrect format of the segment ratios list.')
+            raise ValueError('Incorrect format of the segment ratios list.')
 
 
 def network_thermal_resistance(network: Network, m_flow_network: Union[float, NDArray[np.float64]], cp_f: float) -> float:
@@ -1496,7 +1492,7 @@ def _verify_bore_connectivity(bore_connectivity: List[int], nBoreholes: int):
     # (-1 is the bore field inlet) and that no two boreholes have the same
     # index of fluid inlet (except for -1).
     for index_in in bore_connectivity:
-        n = 0 # Initialize step counter
+        n = 0  # Initialize step counter
         if index_in != -1 and bore_connectivity.count(index_in) > 1:
             raise ValueError(
                 'Two boreholes cannot have the same inlet, except fort the '
@@ -1504,9 +1500,8 @@ def _verify_bore_connectivity(bore_connectivity: List[int], nBoreholes: int):
         # Stop when bore field inlet is reached (index_in == -1)
         while not index_in == -1:
             index_in = bore_connectivity[index_in]
-            n += 1 # Increment step counter
+            n += 1  # Increment step counter
             # Raise error if n exceeds the number of boreholes
             if n > nBoreholes:
-                raise ValueError(
-                    'The borehole connectivity list is invalid.')
+                raise ValueError('The borehole connectivity list is invalid.')
     return
