@@ -1119,7 +1119,10 @@ def _finite_line_source_integrand(dis, H1, D1, H2, D2, reaSource, imgSource):
                       D2 + D1 + H1,
                       D2 + D1 + H2 + H1],
                      axis=-1)
-        f = lambda s: 1/(s*s) * np.exp(-dis*dis*s*s) * np.inner(p, erf_int(q * s))
+        def func(s: float):
+            return np.exp(-dis*dis*s*s) * np.inner(p, erf_int(q * s))/(s*s)
+        return func
+        #f = lambda s: np.exp(-dis*dis*s*s) * np.inner(p, erf_int(q * s))/(s*s)
     elif reaSource:
         # Real FLS solution
         p = np.array([1, -1, 1, -1])
@@ -1128,6 +1131,9 @@ def _finite_line_source_integrand(dis, H1, D1, H2, D2, reaSource, imgSource):
                       D2 - D1 - H1,
                       D2 - D1 + H2 - H1],
                      axis=-1)
+        def func(s: float):
+            return np.exp(-dis*dis*s*s) * np.inner(p, erf_int(q * s))/(s*s)
+        return func
         f = lambda s: 1/(s*s) * np.exp(-dis*dis*s*s) * np.inner(p, erf_int(q * s))
     elif imgSource:
         # Image FLS solution
@@ -1137,6 +1143,9 @@ def _finite_line_source_integrand(dis, H1, D1, H2, D2, reaSource, imgSource):
                       D2 + D1 + H1,
                       D2 + D1 + H2 + H1],
                      axis=-1)
+        #def func(s: float):
+        #    return np.exp(-dis*dis*s*s) * np.inner(p, erf_int(q * s))/(s*s)
+        #return func
         f = lambda s: 1/(s*s) * np.exp(-dis*dis*s*s) * np.inner(p, erf_int(q * s))
     else:
         # No heat source

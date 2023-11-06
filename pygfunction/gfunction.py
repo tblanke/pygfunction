@@ -1616,11 +1616,12 @@ class _BaseSolver(object):
                     A = np.block([[h_dt, -np.ones((self.nSources, 1),
                                                   dtype=self.dtype)],
                                   [H_b, 0.]])
-                    # A = csr_matrix(A)
+                    A = csr_matrix(A)
+                    A.eliminate_zeros()
                     B = np.hstack((-T_b0, H_tot))
                     # Solve the system of equations
-                    # X = sp_solve(A, B)
-                    X = np.linalg.solve(A, B)
+                    X = sp_solve(A, B)
+                    #X = np.linalg.solve(A, B)
                     # Store calculated heat extraction rates
                     Q_b[:,p+p0] = X[0:self.nSources]
                     # The borehole wall temperatures are equal for all segments
@@ -1656,12 +1657,15 @@ class _BaseSolver(object):
                           a_b/(2.0*pi*k_s*np.atleast_2d(Hb_individual).T),
                           a_in/(2.0*pi*k_s*np.atleast_2d(Hb_individual).T)],
                          [H_b, np.zeros(self.nSources + 1, dtype=self.dtype)]])
+                    A = csr_matrix(A)
+                    A.eliminate_zeros()
                     B = np.hstack(
                         (-T_b0,
                          np.zeros(self.nSources, dtype=self.dtype),
                          H_tot))
                     # Solve the system of equations
-                    X = np.linalg.solve(A, B)
+                    X = sp_solve(A, B)
+                    #X = np.linalg.solve(A, B)
                     # Store calculated heat extraction rates
                     Q_b[:,p+p0] = X[0:self.nSources]
                     T_b[:,p+p0] = X[self.nSources:2*self.nSources]
