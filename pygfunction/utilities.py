@@ -2,6 +2,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import numpy.polynomial.polynomial as poly
+from numpy.typing import NDArray
 from scipy.special import erf
 import warnings
 
@@ -25,27 +26,33 @@ def cardinal_point(direction):
 sqrt_pi = 1 / np.sqrt(np.pi)
 
 
-def erf_int(x: np.ndarray):
+def erf_int(x: NDArray[np.float64]) -> NDArray[np.float64]:
     """
     Integral of the error function.
 
     Parameters
     ----------
-    x : float or array
+    x : NDArray[np.float64]
         Argument.
 
     Returns
     -------
-    float or array
+    NDArray[np.float64]
         Integral of the error function.
 
     """
-
     abs_x = np.abs(x)
     y_new = abs_x-sqrt_pi
     idx = np.less(abs_x, 4)
     abs_2 = abs_x[idx]
-    y_new[idx] = abs_2 * erf(abs_2) - (1.0 - np.exp(-abs_2*abs_2)) * sqrt_pi
+    y_new[idx] = abs_2 * erf(abs_2) - (1.0 - np.exp(-abs_2 * abs_2)) * sqrt_pi
+    #y_new[idx] = abs_2 * (1-2*np.power(1+np.power(0.644693+0.22908*abs_2, 4.874), -6.158)) - (1.0 - np.exp(-abs_2*abs_2))* sqrt_pi
+    #idx = np.logical_and(abs_x >= 1, abs_x < 2)
+    #abs_2 = abs_x[idx]
+    #y_new[idx] = abs_2 * np.sin(abs_2**(2/3)) - (1.0 - np.exp(-abs_2*abs_2)) * sqrt_pi
+    #idx = np.less(abs_x, 1)
+    #abs_2 = abs_x[idx]
+    #y_new[idx] = abs_2 * 2 / sqrt_pi * np.sin(np.sin(abs_2))- (1.0 - np.exp(-abs_2*abs_2))* sqrt_pi
     return y_new
 
 
