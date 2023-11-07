@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from typing import Optional
+
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.constants import pi
@@ -488,7 +490,7 @@ class _EquivalentBorehole(object):
 
         return np.array(dis), np.array(wDis)
 
-    def _segment_edges(self, nSegments, segment_ratios=None):
+    def _segment_edges(self, nSegments: int, segment_ratios: Optional[np.float64] = None) -> float:
         """
         Linear coordinates of the segment edges.
 
@@ -1236,7 +1238,6 @@ def visualize_field(
                      np.array([y, y_H]),
                      np.array([borehole.D, z_H]),
                      'k-')
-
 
     if viewTop and view3D:
         plt.tight_layout(rect=[0, 0.0, 0.90, 1.0])

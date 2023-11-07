@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
+from ctypes import Union
 from time import perf_counter
 import warnings
+from typing import Optional, Callable
 
 import matplotlib.pyplot as plt
 import numpy as np
+from numpy._typing import NDArray
 from scipy.cluster.hierarchy import cut_tree, dendrogram, linkage
 from scipy.constants import pi
 from scipy.interpolate import interp1d as interp1d
+from scipy.sparse import csr_matrix
 
 from .boreholes import Borehole, _EquivalentBorehole, find_duplicates
 from .heat_transfer import finite_line_source, finite_line_source_vectorized, \
@@ -1445,13 +1449,13 @@ class _BaseSolver(object):
         Default is numpy.double.
 
     """
-    def __init__(self, boreholes, network, time, boundary_condition,
-                 nSegments=8, segment_ratios=utilities.segment_ratios,
-                 approximate_FLS=False, mQuad=11, nFLS=10,
-                 linear_threshold=None, disp=False, profiles=False,
-                 kind='linear', dtype=np.double, **other_options):
-        self.boreholes = boreholes
-        self.network = network
+    def __init__(self, boreholes: list, network: Network, time: Union[float, NDArray[np.float64]], boundary_condition: str,
+                 nSegments: int = 8, segment_ratios: Optional[Union[NDArray[np.float64], Callable]]=utilities.segment_ratios,
+                 approximate_FLS:bool=False, mQuad: int=11, nFLS: int=10, disp:bool=False,linear_threshold=None,
+                 profiles:bool=False, kind:str='linear', dtype:float=np.double,
+                 **other_options):
+        self.boreholes: list = boreholes
+        self.network: Network = network
         # Convert time to a 1d array
         self.time = np.atleast_1d(time).flatten()
         self.linear_threshold = linear_threshold
@@ -1626,9 +1630,12 @@ class _BaseSolver(object):
                     A = np.block([[h_dt, -np.ones((self.nSources, 1),
                                                   dtype=self.dtype)],
                                   [H_b, 0.]])
+                    A = csr_matrix(A)
+                    A.eliminate_zeros()
                     B = np.hstack((-T_b0, H_tot))
                     # Solve the system of equations
-                    X = np.linalg.solve(A, B)
+                    X = sp_solve(A, B)
+                    #X = np.linalg.solve(A, B)
                     # Store calculated heat extraction rates
                     Q_b[:,p+p0] = X[0:self.nSources]
                     # The borehole wall temperatures are equal for all segments
@@ -1664,12 +1671,15 @@ class _BaseSolver(object):
                           a_b/(2.0*pi*k_s*np.atleast_2d(Hb_individual).T),
                           a_in/(2.0*pi*k_s*np.atleast_2d(Hb_individual).T)],
                          [H_b, np.zeros(self.nSources + 1, dtype=self.dtype)]])
+                    A = csr_matrix(A)
+                    A.eliminate_zeros()
                     B = np.hstack(
                         (-T_b0,
                          np.zeros(self.nSources, dtype=self.dtype),
                          H_tot))
                     # Solve the system of equations
-                    X = np.linalg.solve(A, B)
+                    X = sp_solve(A, B)
+                    #X = np.linalg.solve(A, B)
                     # Store calculated heat extraction rates
                     Q_b[:,p+p0] = X[0:self.nSources]
                     T_b[:,p+p0] = X[self.nSources:2*self.nSources]
